@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include customer_portal_cv *.css
+recursive-include customer_portal_cv *.csv
+recursive-include customer_portal_cv *.html
+recursive-include customer_portal_cv *.ico
+recursive-include customer_portal_cv *.js
+recursive-include customer_portal_cv *.json
+recursive-include customer_portal_cv *.md
+recursive-include customer_portal_cv *.png
+recursive-include customer_portal_cv *.py
+recursive-include customer_portal_cv *.svg
+recursive-include customer_portal_cv *.txt
+recursive-exclude customer_portal_cv *.pyc

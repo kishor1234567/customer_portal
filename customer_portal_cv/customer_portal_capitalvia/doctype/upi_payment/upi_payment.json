@@ -1,0 +1,167 @@
+{
+ "autoname": "field:transaction_number",
+ "creation": "2020-08-15 17:55:13.600606",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transaction_number",
+  "vpa_address",
+  "amount",
+  "remark",
+  "upi_transaction_reference_id",
+  "collection_request_status",
+  "transaction_status",
+  "callback_payload",
+  "customer",
+  "customer_name",
+  "sales_person",
+  "amended_from",
+  "fee_request",
+  "fcm_token"
+ ],
+ "fields": [
+  {
+   "allow_on_submit": 1,
+   "fieldname": "transaction_number",
+   "fieldtype": "Data",
+   "label": "Transaction Number",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "vpa_address",
+   "fieldtype": "Data",
+   "label": "VPA Address",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remark",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "upi_transaction_reference_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UPI Transaction Reference ID",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "collection_request_status",
+   "fieldtype": "Data",
+   "label": "Collection Request Status",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "transaction_status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transaction Status",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "callback_payload",
+   "fieldtype": "Long Text",
+   "label": "Callback Payload",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "UPI Payment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fee_request",
+   "fieldtype": "Link",
+   "label": "Fee Request",
+   "options": "Fee Request",
+   "read_only": 1
+  },
+  {
+   "fieldname": "fcm_token",
+   "fieldtype": "Small Text",
+   "label": "FCM Token",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-11-19 15:52:38.707216",
+ "modified_by": "Administrator",
+ "module": "Customer Portal CapitalVia",
+ "name": "UPI Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

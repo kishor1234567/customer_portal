@@ -1,0 +1,7 @@
+.DS_Store
+*.pyc
+*.egg-info
+*.swp
+tags
+customer_portal_cv/docs/current
+customer-portal-cv
