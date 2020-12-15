@@ -24,6 +24,7 @@ import base64
 from binhex import binhex, hexbin
 import string
 import random
+from frappe.utils.password import get_decrypted_password
 
 CHECK_VPA_URL = "https://upitest.hdfcbank.com/upi/checkMeVirtualAddress"
 COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
@@ -31,9 +32,21 @@ COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
 
 class UPIPayment():
     def __init__(self):
-        self.mcc = "6012"
-        self.merchant_id = "HDFC000005853569"
-        self.merchant_key = "d87822929aa83119f76cf6b762b87b0e"
+        if frappe.db.get_value("HDFC UPI Settings", "HDFC UPI Settings", "test_mode") == "1":
+            self.mcc = "6012"
+            self.merchant_id = "HDFC000005853569"
+            self.merchant_key = "d87822929aa83119f76cf6b762b87b0e"
+        else:
+            settings = frappe.get_doc(
+                "HDFC UPI Settings", "HDFC UPI Settings")
+            if settings.mcc and settings.merchant_id:
+                self.mcc = settings.mcc
+                self.merchant_id = settings.merchant_id
+                self.merchant_key = get_decrypted_password(
+                    "HDFC UPI Settings", "HDFC UPI Settings", "merchant_key")
+            else:
+                frappe.throw("Connection details are missing")
+
         self.vpa = "capitalvia@hdfcbank"
 
     def initiate_payment(self, vpa_address, amount, upi_link, fee_request, fcm_token):
