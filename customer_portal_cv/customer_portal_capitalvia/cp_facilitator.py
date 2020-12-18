@@ -34,13 +34,13 @@ def create_customer(doc, method):
             "send_welcome_email": 0
         })
 
-        user.insert()
+        user.insert(ignore_permissions=True)
 
         roles = ["Customer"]
         user.add_roles(*roles)
         # send_welcome_mail_to_user(user)
         doc.disabled = 1
-        doc.insert()
+        doc.insert(ignore_permissions=True)
 
         # Contact Creation
         contact = frappe.new_doc("Contact")

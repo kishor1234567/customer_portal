@@ -26,8 +26,12 @@ import string
 import random
 from frappe.utils.password import get_decrypted_password
 
-CHECK_VPA_URL = "https://upitest.hdfcbank.com/upi/checkMeVirtualAddress"
-COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
+if frappe.db.get_value("HDFC UPI Settings", "HDFC UPI Settings", "test_mode") == "1":
+    CHECK_VPA_URL = "https://upitest.hdfcbank.com/upi/checkMeVirtualAddress"
+    COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
+else:
+    CHECK_VPA_URL = "https://upi.hdfcbank.com/upi/checkMeVirtualAddress"
+    COLLECT_TRAN_URL = "https://upi.hdfcbank.com/upi/meTransCollectSvc"
 
 
 class UPIPayment():
@@ -36,6 +40,7 @@ class UPIPayment():
             self.mcc = "6012"
             self.merchant_id = "HDFC000005853569"
             self.merchant_key = "d87822929aa83119f76cf6b762b87b0e"
+            self.vpa = "capitalvia@hdfcbank"
         else:
             settings = frappe.get_doc(
                 "HDFC UPI Settings", "HDFC UPI Settings")
@@ -44,10 +49,9 @@ class UPIPayment():
                 self.merchant_id = settings.merchant_id
                 self.merchant_key = get_decrypted_password(
                     "HDFC UPI Settings", "HDFC UPI Settings", "merchant_key")
+                self.vpa = "capitalviaia@hdfcbank"
             else:
                 frappe.throw("Connection details are missing")
-
-        self.vpa = "capitalvia@hdfcbank"
 
     def initiate_payment(self, vpa_address, amount, upi_link, fee_request, fcm_token):
         self.vpa_address = vpa_address
