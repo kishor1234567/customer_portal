@@ -26,8 +26,14 @@ import string
 import random
 from frappe.utils.password import get_decrypted_password
 
-CHECK_VPA_URL = "https://upitest.hdfcbank.com/upi/checkMeVirtualAddress"
-COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
+if frappe.db.get_value("HDFC UPI Settings", "HDFC UPI Settings", "test_mode") == "1":
+    CHECK_VPA_URL = "https://upitest.hdfcbank.com/upi/checkMeVirtualAddress"
+    COLLECT_TRAN_URL = "https://upitest.hdfcbank.com/upi/meTransCollectSvc"
+    CHECK_COLLECT_REQ = "https://upitest.hdfcbank.com/upi/transactionStatusQuery"
+else:
+    CHECK_VPA_URL = "https://upi.hdfcbank.com/upi/checkMeVirtualAddress"
+    COLLECT_TRAN_URL = "https://upi.hdfcbank.com/upi/meTransCollectSvc"
+    CHECK_COLLECT_REQ = "https://upi.hdfcbank.com/upi/transactionStatusQuery"
 
 
 class UPIPayment():
@@ -36,6 +42,7 @@ class UPIPayment():
             self.mcc = "6012"
             self.merchant_id = "HDFC000005853569"
             self.merchant_key = "d87822929aa83119f76cf6b762b87b0e"
+            self.vpa = "capitalvia@hdfcbank"
         else:
             settings = frappe.get_doc(
                 "HDFC UPI Settings", "HDFC UPI Settings")
@@ -44,10 +51,9 @@ class UPIPayment():
                 self.merchant_id = settings.merchant_id
                 self.merchant_key = get_decrypted_password(
                     "HDFC UPI Settings", "HDFC UPI Settings", "merchant_key")
+                self.vpa = "capitalviaia@hdfcbank"
             else:
                 frappe.throw("Connection details are missing")
-
-        self.vpa = "capitalvia@hdfcbank"
 
     def initiate_payment(self, vpa_address, amount, upi_link, fee_request, fcm_token):
         self.vpa_address = vpa_address
@@ -166,6 +172,9 @@ class UPIPayment():
         elif req_type == "CALLBACK":
             data_list = data.split("|")
             return data_list[0], data_list[1], data_list[2], data_list[4], data_list[8]
+        elif req_type == "COLLECTION_POLLING":
+            data_list = data.split("|")
+            return data_list[0], data_list[1], data_list[2], data_list[4]
 
     def generate_link(self):
         """
@@ -194,6 +203,81 @@ class UPIPayment():
         frappe.db.commit()
 
         return payment_string, "UPI_LINK_SUCCESS"
+
+    def check_transaction_status(self, upi_rec):
+        """
+            PGMerchantId|OrderNo|UPITxn ID |1|2|3|4|5|6|7|8|NA|NA=14Nos
+            UPI000000000086|20160728111155|65437829217889||||||||||NA|NA
+        """
+        req = "{}|{}|{}||||||||||NA|NA".format(
+            self.merchant_id, upi_rec.name, upi_rec.upi_transaction_reference_id)
+        frappe.log_error(req)
+        payload = {'requestMsg': _encrypt(
+            req, self.merchant_key), 'pgMerchantId': self.merchant_id}
+
+        headers = {
+            'content-type': "application/json",
+        }
+
+        r = requests.request(
+            "POST", CHECK_COLLECT_REQ, data=json.dumps(payload), headers=headers)
+        res = _decrypt(r.content, self.merchant_key)
+        frappe.log_error(res)
+        upi_ref_id, order_no, amount, tran_status = self.decode_pipes(
+            "COLLECTION_POLLING", res)
+        if tran_status == "SUCCESS" and order_no == upi_rec.name and flt(amount) == flt(upi_rec.amount):
+            upi_rec.transaction_status = tran_status
+            frappe.publish_realtime(
+                "payment_status", {"upi_erp_id": upi_rec.name, "result": "SUCCESS"})
+            frappe.publish_realtime(event="new_notifications", message={
+                                    "type": "default", "message": "Your last payment was successful. Thank you for your payment."}, user=upi_rec.owner)
+            if upi_rec.fee_request:
+                # Update fee request with paydoc is still to be done
+                frappe.db.set_value(
+                    "Fee Request", upi_rec.fee_request, "upi_payment", upi_rec.name)
+                frappe.db.set_value(
+                    "Fee Request", upi_rec.fee_request, "status", "Success")
+                frappe.db.commit()
+
+                if upi_rec.fcm_token:
+                    from customer_portal_cv.customer_portal_capitalvia.fcm_utils import FcmUtils
+                    fcmObj = FcmUtils()
+                    fcmObj.send_single_notification(
+                        message={
+                            "title": "Payment Successful",
+                            "body": "Your last payment of Rs. {} was successful. Thank you for your payment.".format(upi_rec.amount)
+                        },
+                        data={
+                            "route": "payment",
+                            "payment_state": "SUCCESS"
+                        },
+                        token=upi_rec.fcm_token
+                    )
+        elif tran_status != "PENDING":
+            upi_rec.transaction_status = "FAILED"
+            frappe.publish_realtime(
+                "payment_status", {"upi_erp_id": upi_rec.name, "result": "TRY AGAIN"})
+            frappe.publish_realtime(event="new_notifications", message={
+                                    "type": "default", "message": "Your last payment was unsuccessful. Please try again."}, user=upi_rec.owner)
+
+            if upi_rec.fcm_token:
+                from customer_portal_cv.customer_portal_capitalvia.fcm_utils import FcmUtils
+                fcmObj = FcmUtils()
+                fcmObj.send_single_notification(
+                    message={
+                        "title": "Payment Unsuccessful",
+                        "body": "Your last payment was unsuccessful. Please try again."
+                    },
+                    data={
+                        "route": "payment",
+                        "payment_state": "FAILED"
+                    },
+                    token=upi_rec.fcm_token
+                )
+
+        upi_rec.callback_payload = res
+        upi_rec.save()
+        frappe.db.commit()
 
 
 def _encrypt(data, passphrase):

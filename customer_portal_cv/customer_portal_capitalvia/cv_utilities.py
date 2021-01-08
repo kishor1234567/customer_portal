@@ -238,7 +238,7 @@ def post_ticket():
     full_name, sub, msg = frappe.form_dict.get('fullName'), frappe.form_dict.get(
         'subject'), frappe.form_dict.get('message')
 
-    make(content=msg, subject=sub, sender=user, sender_full_name=full_name,
+    make(content=msg, subject=sub, sender="alerts@capitalvia.com", sender_full_name=full_name,
          recipients="support@capitalvia.com", communication_medium="Email", send_email=True)
     frappe.publish_realtime(event="new_notifications", message={
                             "type": "default", "message": "Your ticket is posted and will soon be reflected here."}, user=frappe.session.user)
@@ -287,7 +287,7 @@ def post_rating():
             "document_name": customer[0].name,
             "sales_person": customer[0].sales_person
         })
-        doc.insert()
+        doc.insert(ignore_permissions=True)
         frappe.db.commit()
         frappe.publish_realtime(event="refresh_data",
                                 message="fetchMyRatings", user=user)
@@ -535,7 +535,7 @@ def post_referrals():
             Congratulations! you have been refereed by {0}. <br>
             To start using CapitalVia's Service signup here - https://www.capitalvia.com/offers""".format(full_name)
 
-    make(content=msg, subject=sub, sender="alert@capitalvia.com", sender_full_name=full_name,
+    make(content=msg, subject=sub, sender="alerts@capitalvia.com", sender_full_name=full_name,
          recipients=addresses, communication_medium="Email", send_email=True)
     frappe.publish_realtime(event="new_notifications", message={
                             "type": "default", "message": "Thank you for your referrals."}, user=frappe.session.user)
@@ -928,7 +928,7 @@ def insert_device_info():
         dev_doc.fcm_token = fcm_token
         dev_doc.customer = customer
         dev_doc.email = user
-        dev_doc.insert()
+        dev_doc.insert(ignore_permissions=True)
         frappe.db.commit()
         return "Success"
     return "Already present"
@@ -936,45 +936,47 @@ def insert_device_info():
 
 @ frappe.whitelist()
 def create_non_upi_payment():
-    user = check_permissions()
-    fee_request = frappe.form_dict.get('feeRequest')
     try:
-        if 'filedata' in frappe.form_dict:
-            uploaded_content = base64.b64decode(
-                frappe.form_dict.filedata)
-            uploaded_filename = frappe.form_dict.filename
-    except:
-        raise frappe.ValidationError
+        user = check_permissions()
+        fee_request = frappe.form_dict.get('feeRequest')
+        try:
+            if 'filedata' in frappe.form_dict:
+                uploaded_content = base64.b64decode(
+                    frappe.form_dict.filedata)
+                uploaded_filename = frappe.form_dict.filename
+        except:
+            raise frappe.ValidationError
 
-    customer = frappe.db.sql("""
-                select
-                    cust.name
-                from
-                    `tabUser` user
-                    left join `tabCustomer` cust on cust.email_id = user.name
-                where
-                    user.name = '{0}'
-            """.format(user), as_dict=True)
+        customer = frappe.db.sql("""
+                    select
+                        cust.name
+                    from
+                        `tabUser` user
+                        left join `tabCustomer` cust on cust.email_id = user.name
+                    where
+                        user.name = '{0}'
+                """.format(user), as_dict=True)
 
-    customer = customer[0].name if customer else ""
+        customer = customer[0].name if customer else ""
 
-    dev_doc = frappe.new_doc("Offline Payment")
-    dev_doc.fee_request = fee_request
-    dev_doc.customer = customer
-    dev_doc.insert()
+        dev_doc = frappe.new_doc("Offline Payment")
+        dev_doc.fee_request = fee_request
+        dev_doc.customer = customer
+        dev_doc.insert(ignore_permissions=True)
 
-    # Upload File
-    from frappe.utils.file_manager import save_file
-    f = save_file(
-        fname=uploaded_filename, content=uploaded_content, dt=dev_doc.doctype, dn=dev_doc.name, is_private=1)
-    dev_doc.payment_ack_image = f.file_url
-    dev_doc.submit()
+        # Upload File
+        from frappe.utils.file_manager import save_file
+        f = save_file(
+            fname=uploaded_filename, content=uploaded_content, dt=dev_doc.doctype, dn=dev_doc.name, is_private=1)
+        dev_doc.payment_ack_image = f.file_url
+        dev_doc.submit()
 
-    # Update fee request with paydoc is still to be done
-    frappe.db.set_value(
-        "Fee Request", upi_pay_doc.fee_request, "offline_payment", upi_pay_doc.name)
-    frappe.db.commit()
-
+        # Update fee request with paydoc is still to be done
+        frappe.db.set_value(
+            "Fee Request", upi_pay_doc.fee_request, "offline_payment", upi_pay_doc.name)
+        frappe.db.commit()
+    except Exception as e:
+        frappe.log_error(e)
     return "Success"
 
 
@@ -984,3 +986,19 @@ def check_request_status():
     fee_request = frappe.form_dict.get('fee_request')
     status = frappe.db.get_value("Fee Request", fee_request, "status")
     return status.upper() if status else "FAILED"
+
+
+@ frappe.whitelist()
+def check_collection_request_status():
+    user = check_permissions()
+    fee_request = frappe.form_dict.get('fee_request')
+    payments = frappe.get_all("UPI Payment", filters={
+                              "fee_request": fee_request, "collection_request_status": "SUCCESS"}, order_by="creation desc")
+    if payments:
+        upi_rec = frappe.get_doc("UPI Payment", payments[0].name)
+        from customer_portal_cv.customer_portal_capitalvia.upi_payment import UPIPayment
+        payobj = UPIPayment()
+        payobj.check_transaction_status(upi_rec)
+        return "Done"
+    else:
+        return "No Payments Found"
