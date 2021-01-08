@@ -986,3 +986,19 @@ def check_request_status():
     fee_request = frappe.form_dict.get('fee_request')
     status = frappe.db.get_value("Fee Request", fee_request, "status")
     return status.upper() if status else "FAILED"
+
+
+@ frappe.whitelist()
+def check_collection_request_status():
+    user = check_permissions()
+    fee_request = frappe.form_dict.get('fee_request')
+    payments = frappe.get_all("UPI Payment", filters={
+                              "fee_request": fee_request, "collection_request_status": "SUCCESS"}, order_by="creation desc")
+    if payments:
+        upi_rec = frappe.get_doc("UPI Payment", payments[0].name)
+        from customer_portal_cv.customer_portal_capitalvia.upi_payment import UPIPayment
+        payobj = UPIPayment()
+        payobj.check_transaction_status(upi_rec)
+        return "Done"
+    else:
+        return "No Payments Found"
