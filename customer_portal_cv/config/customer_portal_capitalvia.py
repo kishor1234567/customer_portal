@@ -29,6 +29,11 @@ def get_data():
                     "name": "HDFC UPI Settings",
                     "label": _("HDFC UPI Settings"),
                 },
+                {
+                    "type": "doctype",
+                    "name": "Digio Sign Document",
+                    "label": _("Digio Sign Document"),
+                },
             ]
         }
     ]
