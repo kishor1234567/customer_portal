@@ -52,7 +52,7 @@ frappe.ui.form.on('Digio Sign Document', {
 	download_signed_file: function(frm) {
 		let filenameparts = frm.doc.file_to_sign.split("/");
 		frappe.dom.freeze();
-		fetch('https://api.digio.in/v2/client/document/'+frm.doc.digio_id, {
+		fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/'+frm.doc.digio_id, {
 					method: 'get',
 					headers: {
 						'authorization': 'Basic '+btoa('AIT1MY4Y4F58GQY5TO3OQSSAPIHKXLSO:Q5T4LBMAXP3SFCQVC54SCGGQJFBF3WW1'),
@@ -62,7 +62,7 @@ frappe.ui.form.on('Digio Sign Document', {
 					return response.json();
 				}).then(function(data) {
 					if(data.agreement_status == "completed") {
-						fetch('https://api.digio.in/v2/client/document/download?document_id='+frm.doc.digio_id, {
+						fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/download?document_id='+frm.doc.digio_id, {
 							method: 'get',
 							headers: {
 								'authorization': 'Basic '+btoa('AIT1MY4Y4F58GQY5TO3OQSSAPIHKXLSO:Q5T4LBMAXP3SFCQVC54SCGGQJFBF3WW1'),
