@@ -5,8 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "customer",
-  "customer_name",
+  "lead",
+  "lead_name",
   "email",
   "reason",
   "file_to_sign",
@@ -17,13 +17,7 @@
  ],
  "fields": [
   {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "label": "Customer",
-   "options": "Customer"
-  },
-  {
-   "fetch_from": "customer.email_id",
+   "fetch_from": "lead.email_id",
    "fetch_if_empty": 1,
    "fieldname": "email",
    "fieldtype": "Data",
@@ -56,15 +50,6 @@
    "label": "Download Signed File"
   },
   {
-   "fetch_from": "customer.customer_name",
-   "fetch_if_empty": 1,
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Customer Name",
-   "reqd": 1
-  },
-  {
    "fieldname": "reason",
    "fieldtype": "Data",
    "label": "Reason"
@@ -74,10 +59,25 @@
    "fieldtype": "Data",
    "label": "Digio ID",
    "read_only": 1
+  },
+  {
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Lead"
+  },
+  {
+   "fetch_from": "lead.lead_name",
+   "fetch_if_empty": 1,
+   "fieldname": "lead_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Lead Name",
+   "reqd": 1
   }
  ],
- "modified": "2021-01-08 21:36:51.365996",
- "modified_by": "Administrator",
+ "modified": "2021-01-09 09:29:42.145022",
+ "modified_by": "vishakha.mishra@capitalvia.com",
  "module": "Customer Portal CapitalVia",
  "name": "Digio Sign Document",
  "owner": "Administrator",

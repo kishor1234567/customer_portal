@@ -11,7 +11,7 @@ frappe.ui.form.on('Digio Sign Document', {
 			frappe.throw("Only PDF documents are allowed to be signed");
 		}
 
-		if(frm.doc.customer_name && frm.doc.email) {
+		if(frm.doc.lead_name && frm.doc.email) {
 			toDataUrl(window.location.origin+frm.doc.file_to_sign, function(datab64) {
 				frappe.dom.freeze();
 				fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/uploadpdf', {
@@ -23,7 +23,7 @@ frappe.ui.form.on('Digio Sign Document', {
 						body: JSON.stringify({
 							"signers": [{
 								"identifier": frm.doc.email,
-								"name": frm.doc.customer_name,
+								"name": frm.doc.lead_name,
 								"reason": frm.doc.reason
 							}],
 							"expire_in_days": 1,
@@ -46,7 +46,7 @@ frappe.ui.form.on('Digio Sign Document', {
 					});
 			});
 		} else {
-			frappe.throw("Customer Name and Email is mandatory");
+			frappe.throw("Lead Name and Email is mandatory");
 		}
 	},
 	download_signed_file: function(frm) {
