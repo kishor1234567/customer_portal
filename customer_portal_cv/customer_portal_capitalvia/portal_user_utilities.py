@@ -16,6 +16,7 @@ from frappe.utils import nowdate, get_first_day, get_last_day, formatdate, getda
 from frappe.twofactor import (should_run_2fa, authenticate_for_2factor, get_cached_user_pass,
                               two_factor_is_enabled_for_, confirm_otp_token, get_otpsecret_for_, get_verification_obj)
 from frappe.utils.password import update_password as _update_password
+from frappe.utils.password import set_encrypted_password, delete_login_failed_cache, passlibctx, decrypt
 
 
 @frappe.whitelist(allow_guest=True)
@@ -126,3 +127,41 @@ def reset_password():
     else:
         raise frappe.ValidationError(
             "Passwords does not match or key is missing")
+
+
+@frappe.whitelist()
+def reset_pin():
+    pwd, apwd = None, None
+    if frappe.session.user != "Guest":
+        pwd = frappe.form_dict.get('pwd')
+        apwd = frappe.form_dict.get('apwd')
+
+    if pwd and apwd:
+        set_encrypted_password("User", frappe.session.user,
+                               pwd, fieldname="pin")
+        frappe.db.commit()
+        return "SUCCESS"
+    else:
+        raise frappe.ValidationError(
+            "Passwords does not match or key is missing")
+
+
+@frappe.whitelist(allow_guest=True)
+def check_pin(user, pin):
+    doctype = 'User'
+    fieldname = 'pin'
+    '''Checks if user and password are correct, else raises frappe.AuthenticationError'''
+
+    auth = frappe.db.sql("""select `name`, `password` from `__Auth`
+    where `doctype`=%(doctype)s and `name`=%(name)s and `fieldname`=%(fieldname)s and `encrypted`=1""",
+                         {'doctype': doctype, 'name': user, 'fieldname': fieldname}, as_dict=True)
+
+    # if not auth or not passlibctx.verify(pin, auth[0].password):
+    if not auth or not pin == decrypt(auth[0].password):
+        raise frappe.AuthenticationError(_('Incorrect User or Password'))
+
+    # lettercase agnostic
+    user = auth[0].name
+    delete_login_failed_cache(user)
+
+    frappe.local.login_manager.login_as(user)
