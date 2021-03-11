@@ -12,11 +12,12 @@ import time
 import base64
 import pyotp
 from frappe import msgprint, _
-from frappe.utils import nowdate, get_first_day, get_last_day, formatdate, getdate, flt, get_files_path
-from frappe.twofactor import (should_run_2fa, authenticate_for_2factor, get_cached_user_pass,
+from frappe.utils import cstr, nowdate, get_first_day, get_last_day, formatdate, getdate, flt, get_files_path
+from frappe.twofactor import (should_run_2fa, authenticate_for_2factor, get_cached_user_pass, send_token_via_sms,
                               two_factor_is_enabled_for_, confirm_otp_token, get_otpsecret_for_, get_verification_obj)
 from frappe.utils.password import update_password as _update_password
 from frappe.utils.password import set_encrypted_password, delete_login_failed_cache, passlibctx, decrypt
+from frappe.core.doctype.sms_settings.sms_settings import send_sms
 
 
 @frappe.whitelist(allow_guest=True)
@@ -24,8 +25,33 @@ def initiate_pwd_reset():
     email = frappe.form_dict.get('email')
     if email and frappe.db.exists('User', email):
         authenticate_for_2factor(email)
+        phone = get_phone_no(email)
+        if phone:
+            tmp_id = frappe.local.response['tmp_id']
+            otp_secret = frappe.cache().get(tmp_id + '_otp_secret')
+            token = frappe.cache().get(tmp_id + '_token')
+            # Surprisingly following 2FA method is not working
+            # status = send_token_via_sms(otp_secret, token=token, phone_no=phone)
+            from frappe.core.doctype.sms_settings.sms_settings import send_sms
+            hotp = pyotp.HOTP(otp_secret)
+            msg = 'Your verification code is {}'.format(hotp.at(int(token)))
+            send_sms([cstr(phone)], msg)
+        frappe.db.commit()
     else:
         raise frappe.PermissionError("User does not exist")
+
+
+def get_phone_no(user):
+    user_info = frappe.db.sql("""
+        select
+            lead.primary_mobile
+        from
+            `tabUser` user
+            left join `tabLead` lead on lead.email_id = user.name
+        where
+            user.name = '{0}'
+    """.format(user), as_dict=True)
+    return user_info[0].primary_mobile if user_info else None
 
 
 @frappe.whitelist(allow_guest=True)
