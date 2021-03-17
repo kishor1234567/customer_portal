@@ -85,7 +85,6 @@ class UPIPayment():
             "POST", CHECK_VPA_URL, data=json.dumps(payload), headers=headers)
         frappe.log_error(_decrypt(r.content, self.merchant_key))
         rd = _decrypt(r.content, self.merchant_key)
-        queue_slack_notification(rd)
         return _decrypt(r.content, self.merchant_key)
 
     def collect_transaction_request(self):
@@ -109,7 +108,6 @@ class UPIPayment():
             "POST", COLLECT_TRAN_URL, data=json.dumps(payload), headers=headers)
         frappe.log_error(r.content)
         rd = _decrypt(r.content, self.merchant_key)
-        queue_slack_notification(rd)
         frappe.log_error(_decrypt(r.content, self.merchant_key))
         self.request_started = int(time.time())
         upi_ref_id, status, tran_status, field_6 = self.decode_pipes(
@@ -227,7 +225,6 @@ class UPIPayment():
             "POST", CHECK_COLLECT_REQ, data=json.dumps(payload), headers=headers)
         res = _decrypt(r.content, self.merchant_key)
         frappe.log_error(res)
-        queue_slack_notification(res)
         upi_ref_id, order_no, amount, tran_status = self.decode_pipes(
             "COLLECTION_POLLING", res)
         if tran_status == "SUCCESS" and order_no == upi_rec.name and flt(amount) == flt(upi_rec.amount):
@@ -322,11 +319,3 @@ def callback_payment(response, merchant_id):
     payobj = UPIPayment()
     if payobj.merchant_id == merchant_id:
         return payobj.validate_payment(response)
-
-
-def queue_slack_notification(msg):
-    frappe.enqueue(send_slack_notification, msg=msg, queue='short', timeout=4000, user="Guest")
-
-def send_slack_notification(msg):
-    url = 'https://troubleshootingteam.slack.com/api/chat.postMessage?token=xoxb-1647119811425-1631460995093-7coPpwyx2MDr6Thy3UdgK8EI&channel=C01JKBYL2FP&text='+str(msg)
-    requests.post(url)

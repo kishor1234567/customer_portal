@@ -561,7 +561,7 @@ def initiate_payment():
 
 @ frappe.whitelist(allow_guest=True)
 def callback_upi(meRes, pgMerchantId):
-    queue_slack_notification("Callback received")
+    #queue_slack_notification("Callback received")
     frappe.enqueue(_call_through, action="CALLBACK_UPI", args=frappe._dict({
         'meRes': meRes,
         'pgMerchantId': pgMerchantId
@@ -796,12 +796,15 @@ def get_trading_signals_mobile():
             sig.fumsg4_time,
             sig.message as message,
             sl.creation as creation,
+            sl.name as signal_log_name,
+            sl.executed,
             sig.script_name,
             sig.min_entry_price,
             sig.max_entry_price,
             sig.target_price,
             sig.entry_lots as quantity,
-            "" as action_notes
+            "" as action_notes,
+            sig.net_profit as profit
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -835,12 +838,15 @@ def get_trading_signals_mobile():
                 else ""
             end as message,
             sl.creation as creation,
+            sl.name as signal_log_name,
+            sl.executed,
             "",
             0.00,
             0.00,
             0.00,
             0.00,
-            item.action_notes as action_notes
+            item.action_notes as action_notes,
+            rx_chd.net_profit as net_profit
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -1006,10 +1012,13 @@ def check_collection_request_status():
         return "No Payments Found"
 
 
-def queue_slack_notification(msg):
-    frappe.enqueue(send_slack_notification, msg=msg, queue='short', timeout=4000)
+@frappe.whitelist()
+def mark_executed():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
 
-def send_slack_notification(msg):
-    import requests
-    url = 'https://troubleshootingteam.slack.com/api/chat.postMessage?token=xoxb-1647119811425-1631460995093-7coPpwyx2MDr6Thy3UdgK8EI&channel=C01JKBYL2FP&text='+str(msg)
-    requests.post(url)
+    frappe.db.set_value("Signal Logs", signal_log, "executed", 1)
+    frappe.db.commit()
+    return "SUCCESS"
