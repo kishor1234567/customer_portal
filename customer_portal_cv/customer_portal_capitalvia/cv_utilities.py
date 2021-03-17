@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import requests
 import os
 import redis
 import ast
@@ -560,6 +561,7 @@ def initiate_payment():
 
 @ frappe.whitelist(allow_guest=True)
 def callback_upi(meRes, pgMerchantId):
+    queue_slack_notification("Callback received")
     frappe.enqueue(_call_through, action="CALLBACK_UPI", args=frappe._dict({
         'meRes': meRes,
         'pgMerchantId': pgMerchantId
@@ -1002,3 +1004,12 @@ def check_collection_request_status():
         return "Done"
     else:
         return "No Payments Found"
+
+
+def queue_slack_notification(msg):
+    frappe.enqueue(send_slack_notification, msg=msg, queue='short', timeout=4000)
+
+def send_slack_notification(msg):
+    import requests
+    url = 'https://troubleshootingteam.slack.com/api/chat.postMessage?token=xoxb-1647119811425-1631460995093-7coPpwyx2MDr6Thy3UdgK8EI&channel=C01JKBYL2FP&text='+str(msg)
+    requests.post(url)

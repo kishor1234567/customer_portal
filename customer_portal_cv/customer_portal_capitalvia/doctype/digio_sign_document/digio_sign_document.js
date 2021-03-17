@@ -14,7 +14,7 @@ frappe.ui.form.on('Digio Sign Document', {
 		if(frm.doc.lead_name && frm.doc.email) {
 			toDataUrl(window.location.origin+frm.doc.file_to_sign, function(datab64) {
 				frappe.dom.freeze();
-				fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/uploadpdf', {
+				fetch('https://dev-api.fintastiq.com:8080/https://api.digio.in/v2/client/document/uploadpdf', {
 						method: 'post',
 						headers: {
 							'authorization': 'Basic '+btoa('AIT1MY4Y4F58GQY5TO3OQSSAPIHKXLSO:Q5T4LBMAXP3SFCQVC54SCGGQJFBF3WW1'),
@@ -52,7 +52,7 @@ frappe.ui.form.on('Digio Sign Document', {
 	download_signed_file: function(frm) {
 		let filenameparts = frm.doc.file_to_sign.split("/");
 		frappe.dom.freeze();
-		fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/'+frm.doc.digio_id, {
+		fetch('https://dev-api.fintastiq.com:8080/https://api.digio.in/v2/client/document/'+frm.doc.digio_id, {
 					method: 'get',
 					headers: {
 						'authorization': 'Basic '+btoa('AIT1MY4Y4F58GQY5TO3OQSSAPIHKXLSO:Q5T4LBMAXP3SFCQVC54SCGGQJFBF3WW1'),
@@ -62,7 +62,7 @@ frappe.ui.form.on('Digio Sign Document', {
 					return response.json();
 				}).then(function(data) {
 					if(data.agreement_status == "completed") {
-						fetch('https://cors-anywhere.herokuapp.com/https://api.digio.in/v2/client/document/download?document_id='+frm.doc.digio_id, {
+						fetch('https://dev-api.fintastiq.com:8080/https://api.digio.in/v2/client/document/download?document_id='+frm.doc.digio_id, {
 							method: 'get',
 							headers: {
 								'authorization': 'Basic '+btoa('AIT1MY4Y4F58GQY5TO3OQSSAPIHKXLSO:Q5T4LBMAXP3SFCQVC54SCGGQJFBF3WW1'),
