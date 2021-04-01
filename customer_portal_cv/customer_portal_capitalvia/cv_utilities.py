@@ -126,6 +126,7 @@ def get_trading_signals():
             sig.action,
             sig.script_name,
             sig.status,
+            sig.service,
             sig.entry_lots,
             sig.min_entry_price,
             sig.max_entry_price,
