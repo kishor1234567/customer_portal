@@ -55,7 +55,6 @@ def create_customer(doc, method):
 
         frappe.db.commit()
 
-
 def send_welcome_mail_to_user(user):
     self = user
     from frappe.utils import get_url
@@ -121,7 +120,7 @@ def hook_send_signal_notifications(doc, method):
 def send_signal_notifications(message, recipients):
     if recipients != "[]":
         recipients = json.loads(recipients)
-        email_list = frappe.db.sql("select cust.email_id from `tabCustomer` cust where cust.name in (%s)" % (
+        email_list = send_signal_notificationsfrappe.db.sql("select cust.email_id from `tabCustomer` cust where cust.name in (%s)" % (
             ",".join(["%s"] * len(recipients))), tuple(recipients), as_list=True)
 
         email_list = [e[0] for e in email_list]
