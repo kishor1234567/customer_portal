@@ -1028,7 +1028,7 @@ def mark_executed():
     return "SUCCESS"
 
 @frappe.whitelist()
-def mark_recommendation();
+def mark_recommendation():
     user = check_permissions()
     signal_log = frappe.form_dict.get('signal_log')
     if not signal_log:
