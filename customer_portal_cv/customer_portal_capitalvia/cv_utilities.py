@@ -721,6 +721,7 @@ def get_latest_trading_signal():
         select
             rx.name,
             1 as rx,
+            rx.product,
             rx_chd.action,
             "",
             "",
