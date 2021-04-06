@@ -721,7 +721,6 @@ def get_latest_trading_signal():
         select
             rx.name,
             1 as rx,
-            rx.product,
             rx_chd.action,
             "",
             "",
@@ -823,7 +822,6 @@ def get_trading_signals_mobile():
         select
             rx.name,
             1 as rx,
-            rx.product,
             rx_chd.action,
             "",
             "",
@@ -1027,12 +1025,3 @@ def mark_executed():
     frappe.db.set_value("Signal Logs", signal_log, "executed", 1)
     frappe.db.commit()
     return "SUCCESS"
-
-@frappe.whitelist()
-def mark_recommendation():
-    user = check_permissions()
-    signal_log = frappe.form_dict.get('signal_logs')
-    if not signal_log:
-        frappe.throw("Signal log")
-
-    frappe.db.set_value("Signal Logs", signal_log, "mark_recm", 1)
