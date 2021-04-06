@@ -126,7 +126,6 @@ def get_trading_signals():
             sig.action,
             sig.script_name,
             sig.status,
-            sig.service,
             sig.entry_lots,
             sig.min_entry_price,
             sig.max_entry_price,
@@ -344,7 +343,6 @@ def get_trading_signal():
             sig.target_price,
             sig.entry_date,
             sl.creation,
-            sig.service,
             sig.fumsg1,
             sig.fumsg1_time,
             sig.fumsg2,
@@ -717,7 +715,6 @@ def get_latest_trading_signal():
             user.name = '{0}' and sl.creation is not null and sig.name is not null
         
         union
-
         select
             rx.name,
             1 as rx,
@@ -796,7 +793,6 @@ def get_trading_signals_mobile():
             sig.fumsg3_time,
             sig.fumsg4,
             sig.fumsg4_time,
-            sig.service,
             sig.message as message,
             sl.creation as creation,
             sl.name as signal_log_name,
@@ -818,7 +814,6 @@ def get_trading_signals_mobile():
             user.name = '{0}' and sl.creation is not null and sig.name is not null
         
         union
-
         select
             rx.name,
             1 as rx,
