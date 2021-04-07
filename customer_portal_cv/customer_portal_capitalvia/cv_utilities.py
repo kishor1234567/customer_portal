@@ -821,7 +821,6 @@ def get_trading_signals_mobile():
 
         select
             rx.name,
-            rx.product,
             1 as rx,
             rx_chd.action,
             "",
