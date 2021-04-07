@@ -831,6 +831,7 @@ def get_trading_signals_mobile():
             "",
             "",
             "",
+            "",
             case
                 when rx_chd.idx = 1 THEN rx.recommendation_1
                 when rx_chd.idx = 2 THEN rx.recommendation_2
