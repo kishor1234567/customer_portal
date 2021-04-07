@@ -34,7 +34,7 @@ def initiate_pwd_reset():
             # status = send_token_via_sms(otp_secret, token=token, phone_no=phone)
             from frappe.core.doctype.sms_settings.sms_settings import send_sms
             hotp = pyotp.HOTP(otp_secret)
-            msg = 'Your verification code is {}'.format(hotp.at(int(token)))
+            msg = 'Your verification code is {} Team CapitalVia'.format(hotp.at(int(token)))
             send_sms([cstr(phone)], msg)
         frappe.db.commit()
     else:
