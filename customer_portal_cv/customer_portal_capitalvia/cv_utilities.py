@@ -796,7 +796,6 @@ def get_trading_signals_mobile():
             sig.fumsg3_time,
             sig.fumsg4,
             sig.fumsg4_time,
-            sig.service,
             sig.message as message,
             sl.creation as creation,
             sl.name as signal_log_name,
