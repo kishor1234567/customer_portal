@@ -806,7 +806,7 @@ def get_trading_signals_mobile():
             "" as action_notes,
             sig.net_profit as profit,
             sig.service,
-            sig.recommendation
+            s1.recommendation
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
