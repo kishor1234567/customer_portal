@@ -805,7 +805,8 @@ def get_trading_signals_mobile():
             sig.target_price,
             sig.entry_lots as quantity,
             "" as action_notes,
-            sig.net_profit as profit
+            sig.net_profit as profit,
+            sig.recommendation
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -847,7 +848,8 @@ def get_trading_signals_mobile():
             0.00,
             0.00,
             item.action_notes as action_notes,
-            rx_chd.net_profit as net_profit
+            rx_chd.net_profit as net_profit,
+            s1.recommendation
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
