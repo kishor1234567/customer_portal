@@ -697,6 +697,7 @@ def get_latest_trading_signal():
             sig.fumsg3_time,
             sig.fumsg4,
             sig.fumsg4_time,
+            sig.service,
             sig.message as message,
             sl.creation as creation,
             sig.script_name,
@@ -785,6 +786,7 @@ def get_trading_signals_mobile():
             sig.name,
             0 as rx,
             sig.action,
+            sig.service,
             sig.fumsg1,
             sig.fumsg1_time,
             sig.fumsg2,
@@ -818,6 +820,7 @@ def get_trading_signals_mobile():
             rx.name,
             1 as rx,
             rx_chd.action,
+            "",
             "",
             "",
             "",
@@ -1018,5 +1021,16 @@ def mark_executed():
         frappe.throw("Signal Log in required")
 
     frappe.db.set_value("Signal Logs", signal_log, "executed", 1)
+    frappe.db.commit()
+    return "SUCCESS"
+
+@frappe.whitelist()
+def mark_recommendation_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "recommendation", 1)
     frappe.db.commit()
     return "SUCCESS"
