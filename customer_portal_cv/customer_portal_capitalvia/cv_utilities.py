@@ -786,7 +786,6 @@ def get_trading_signals_mobile():
             sig.name,
             0 as rx,
             sig.action,
-            sig.service,
             sig.fumsg1,
             sig.fumsg1_time,
             sig.fumsg2,
@@ -806,6 +805,7 @@ def get_trading_signals_mobile():
             sig.entry_lots as quantity,
             "" as action_notes,
             sig.net_profit as profit,
+            sig.service,
             sig.recommendation
         from
             `tabUser` user
@@ -821,7 +821,6 @@ def get_trading_signals_mobile():
             rx.name,
             1 as rx,
             rx_chd.action,
-            "",
             "",
             "",
             "",
@@ -849,6 +848,7 @@ def get_trading_signals_mobile():
             0.00,
             item.action_notes as action_notes,
             rx_chd.net_profit as net_profit,
+            "",
             s1.recommendation
         from
             `tabUser` user
