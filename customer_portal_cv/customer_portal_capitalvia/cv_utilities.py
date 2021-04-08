@@ -1027,3 +1027,14 @@ def mark_executed():
     frappe.db.set_value("Signal Logs", signal_log, "executed", 1)
     frappe.db.commit()
     return "SUCCESS"
+
+@frappe.whitelist()
+def mark_recommendation_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "recommendation", 1)
+    frappe.db.commit()
+    return "SUCCESS"
