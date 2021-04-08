@@ -848,7 +848,7 @@ def get_trading_signals_mobile():
             0.00,
             item.action_notes as action_notes,
             rx_chd.net_profit as net_profit,
-            "",
+            rx.product,
             s1.recommendation
         from
             `tabUser` user
