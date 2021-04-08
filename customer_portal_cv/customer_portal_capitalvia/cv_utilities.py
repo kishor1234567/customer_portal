@@ -849,7 +849,7 @@ def get_trading_signals_mobile():
             item.action_notes as action_notes,
             rx_chd.net_profit as net_profit,
             rx.product,
-            sl.recommendation,
+            sl.recommendation
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
