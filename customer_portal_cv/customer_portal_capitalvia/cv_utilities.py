@@ -806,7 +806,11 @@ def get_trading_signals_mobile():
             "" as action_notes,
             sig.net_profit as profit,
             sig.service,
-            sl.recommendation
+            sl.recommendation,
+            sl.fw1,
+            sl.fw2,
+            sl.fw3,
+            sl.fw4
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -849,7 +853,11 @@ def get_trading_signals_mobile():
             item.action_notes as action_notes,
             rx_chd.net_profit as net_profit,
             rx.product as service,
-            sl.recommendation
+            sl.recommendation,
+            sl.fw1,
+            sl.fw2,
+            sl.fw3,
+            sl.fw4
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -1034,5 +1042,49 @@ def mark_recommendation_read():
         frappe.throw("Signal Log in required")
 
     frappe.db.set_value("Signal Logs", signal_log, "recommendation", 1)
+    frappe.db.commit()
+    return "SUCCESS"
+
+@frappe.whitelist()
+def mark_fw1_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "fw1", 1)
+    frappe.db.commit()
+    return "SUCCESS"
+
+@frappe.whitelist()
+def mark_fw2_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "fw2", 1)
+    frappe.db.commit()
+    return "SUCCESS"
+
+@frappe.whitelist()
+def mark_fw3_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "fw3", 1)
+    frappe.db.commit()
+    return "SUCCESS"
+
+@frappe.whitelist()
+def mark_fw4_read():
+    user = check_permissions()
+    signal_log = frappe.form_dict.get('signal_log')
+    if not signal_log:
+        frappe.throw("Signal Log in required")
+
+    frappe.db.set_value("Signal Logs", signal_log, "fw4", 1)
     frappe.db.commit()
     return "SUCCESS"
