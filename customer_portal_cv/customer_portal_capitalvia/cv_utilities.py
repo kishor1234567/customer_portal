@@ -728,7 +728,6 @@ def get_latest_trading_signal():
             "",
             "",
             "",
-            "",
             case
                 when rx_chd.idx = 1 THEN rx.recommendation_1
                 when rx_chd.idx = 2 THEN rx.recommendation_2
@@ -799,6 +798,7 @@ def get_trading_signals_mobile():
             sl.creation as creation,
             sl.name as signal_log_name,
             sl.executed,
+            sl.recommendation,
             sig.script_name,
             sig.min_entry_price,
             sig.max_entry_price,
@@ -806,8 +806,7 @@ def get_trading_signals_mobile():
             sig.entry_lots as quantity,
             "" as action_notes,
             sig.net_profit as profit,
-            sig.service,
-            sl.recommendation
+            sig.service
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
@@ -842,15 +841,14 @@ def get_trading_signals_mobile():
             sl.creation as creation,
             sl.name as signal_log_name,
             sl.executed,
+            sl.recommendation,
             "",
             0.00,
             0.00,
             0.00,
             0.00,
             item.action_notes as action_notes,
-            rx_chd.net_profit as net_profit,
-            rx.product as servoce,
-            sl.recommendation
+            rx_chd.net_profit as net_profit
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
