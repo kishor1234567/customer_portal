@@ -728,6 +728,7 @@ def get_latest_trading_signal():
             "",
             "",
             "",
+            "",
             case
                 when rx_chd.idx = 1 THEN rx.recommendation_1
                 when rx_chd.idx = 2 THEN rx.recommendation_2
@@ -848,7 +849,7 @@ def get_trading_signals_mobile():
             0.00,
             item.action_notes as action_notes,
             rx_chd.net_profit as net_profit,
-            rx.product,
+            rx.product as servoce,
             sl.recommendation
         from
             `tabUser` user
