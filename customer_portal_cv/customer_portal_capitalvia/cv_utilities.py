@@ -586,7 +586,7 @@ def callback_upi_wrapper(meRes, pgMerchantId):
         frappe.publish_realtime(event="new_notifications", message={
             "type": "default", "message": "Your last payment was successful. Thank you for your payment."}, user=owner)
         if qr_req == "QR OR DEEP LINKING INITIATED":
-            frappe.publish_realtime(event="qr_notification", message={
+            frappe.publish_realtime(event="qr_ ", message={
                 "type": "default", "message": "Your last payment of Rs. {} was successful. Thank you for your payment.".format(upi_pay_doc.amount)}, user=owner)
         if upi_pay_doc.fee_request:
             # Update fee request with paydoc is still to be done
@@ -805,8 +805,7 @@ def get_trading_signals_mobile():
             sig.target_price,
             sig.entry_lots as quantity,
             "" as action_notes,
-            sig.net_profit as profit,
-            sig.service
+            sig.net_profit as profit
         from
             `tabUser` user
             left join `tabCustomer` cust on cust.email_id = user.name
